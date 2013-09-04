@@ -1,0 +1,34 @@
+SELECT [CAT #], UPC, [ITEM DESCRIPTION], SUM(Order5) AS [May Orders], SUM([NET SALES (UNITS)]) AS [May Sold], SUM(Order6) AS [June Orders], SUM(Sold6) AS [June Sold], SUM(QTY) AS [Inventory]
+FROM (
+	SELECT [CAT #], UPC, [ITEM DESCRIPTION], [Orders] AS Orders5, 0 AS [NET SALES (UNITS)]
+  	FROM [Order-May13]
+
+  	UNION ALL
+
+  	SELECT [CAT #], UPC, [ITEM DESCRIPTION],0 AS [Orders], [NET SALES (UNITS)] AS Sold5, 0 AS Order6, 0 AS Sold6
+  	FROM [SKU Analysis-05-13]
+	
+	UNION ALL
+	
+	SELECT [CAT #], UPC, [ITEM DESCRIPTION], 0 AS Order5, 0 AS Sold5, [Orders] AS Order6, 0 AS [NET SALES (UNITS)]
+  	FROM [Order-June13]
+	
+	SELECT [CAT #], UPC, [ITEM DESCRIPTION],0 AS [Orders], [NET SALES (UNITS)]
+  	FROM [SKU Analysis-06-13]
+	
+)  AS [SalesReport]
+GROUP BY [CAT #], UPC, [ITEM DESCRIPTION];
+
+--
+
+SELECT TotalSale.[CAT #], TotalSale.UPC, TotalSale.[ITEM DESCRIPTION], Sum(TotalSale.BOM5) AS [May Order], Sum(TotalSale.UNITS05) AS [MAY Sold], SUM(TotalSale.BOM6) AS [Jun Order], SUM(TotalSale.UNITS06) AS [Jun Sold], SUM(QTY) AS [TL QTY]
+FROM (
+	SELECT [CAT #], UPC, [ITEM DESCRIPTION], BOM AS BOM5,[NET SALES (UNITS)] AS UNITS05,0 AS BOM6,  0 AS UNITS06, BOM - [NET SALES (UNITS)] AS QTY
+	FROM [SKU Analysis-05-13]
+
+	UNION ALL
+
+	SELECT [CAT #], UPC, [ITEM DESCRIPTION], 0 AS BOM5,0 AS UNITS05, BOM AS BOM6, [NET SALES (UNITS)] AS UNITS06, BOM - [NET SALES (UNITS)] AS QTY
+	FROM [SKU Analysis-06-13]
+)  AS TotalSale
+GROUP BY TotalSale.[CAT #], TotalSale.UPC, TotalSale.[ITEM DESCRIPTION];
